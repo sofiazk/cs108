@@ -1,0 +1,33 @@
+File name: example_08_transcript.txt
+Author: Sofia Kurd
+Description: Example of ord() and chr() functions
+
+ord(c)
+
+chr(n)
+
+
+
+ord('e')
+
+101
+
+ord('G')
+
+71
+
+chr(101)
+
+'e'
+
+chr(71)
+
+'G'
+
+chr(ord('a') + 13)
+
+'n'
+
+chr(ord('P') + 13 - 26)
+
+'c'

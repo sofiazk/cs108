@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)http://cs-people.bu.edu/azs/cs108/assignments/a11.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Assignment 11: User Defined Class, Inheritance — CS108, Boston University</title>
+
+<meta name="description" content="Course website for CS108, Boston University.">
+<link rel="stylesheet" href="./Assignment 11_ User Defined Class, Inheritance — CS108, Boston University_files/style.css">
+<!-- 
+<link rel="icon" type="image/x-icon" href="http://cs-people.bu.edu/azs/cs108/img/favicon.ico"> 
+<link rel="mask-icon" href="http://cs-people.bu.edu/azs/cs108/img/111.svg" color="#cc0000">
+-->
+<script src="./Assignment 11_ User Defined Class, Inheritance — CS108, Boston University_files/respond.min.js"></script>
+<script src="./Assignment 11_ User Defined Class, Inheritance — CS108, Boston University_files/html5shiv.js"></script>
+<script src="./Assignment 11_ User Defined Class, Inheritance — CS108, Boston University_files/cs111.js"></script>
+<meta name="viewport" content="width=device-width, user-scalable=yes">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="-1">
+</head>
+
+<body onload="setup();">
+
+<div id="left">
+<a id="header" href="http://cs-people.bu.edu/azs/cs108/" class="">
+CS108
+</a>
+<div id="subheader">
+Fall 2019
+</div>
+
+<nav>
+<ul>
+    <li><a href="http://cs-people.bu.edu/azs/cs108/index.html">Home</a></li>
+    <li><a href="https://learn.bu.edu/" target="_top">Blackboard</a></li>
+    <li><a href="http://cs-people.bu.edu/azs/cs108/files/syllabus.pdf">Syllabus</a></li>
+    <li><a href="http://cs-people.bu.edu/azs/cs108/staff.html">Staff</a></li>
+	<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/">Assignments</a></li>
+    <li><a href="http://cs-people.bu.edu/azs/cs108/resources.html">Resources</a></li>
+    <li><a href="http://cs-people.bu.edu/azs/cs108/collaboration.html">Collaboration</a></li>
+</ul>
+<ul class="external">
+    <li><a href="http://pythontutor.com/visualize.html#py=3" target="_blank">Python Tutor</a></li>
+    <li><a href="https://piazza.com/bu/fall2019/cs108" target="_blank">Piazza Discussion</a></li>
+    <li><a href="https://www.gradescope.com/courses/60294" target="_blank">Gradescope</a></li> 
+<!--
+    <li><a href="http://cs-people.bu.edu/azs/cs108/policies.html">Policies</a></li>
+    -->
+</ul>
+</nav>
+
+</div><!-- end #left -->
+
+<div id="middle">
+<section class="main">
+<h1 id="assignment-11-user-defined-class-inheritance">Assignment 11: User Defined Class, Inheritance</h1>
+<div class="toc">
+<ul>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#assignment-11-user-defined-class-inheritance">Assignment 11: User Defined Class, Inheritance</a><ul>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#preliminaries">Preliminaries</a></li>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#objective-and-overview">Objective and Overview</a><ul>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#task-1-a-holiday-class">Task 1: A Holiday class</a></li>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#task-2-holiday-clients">Task 2: Holiday clients</a></li>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#submitting-your-work">Submitting Your Work</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<p><em>due by <font color="blue"><strong>11:59 p.m.</strong></font> on Thursday, October 17, 2019</em></p>
+<h2 id="preliminaries">Preliminaries</h2>
+<p>In your work on this assignment, make sure to abide by the
+<a href="http://cs-people.bu.edu/azs/cs108/collaboration.html">collaboration policies</a> of the course.  </p>
+<p>If you have questions while working on this assignment, please post them on <a href="https://piazza.com/class/bu/fall2019/cs108">Piazza!</a>
+This is the best way to get a quick response from your classmates and the course staff. </p>
+<p>For each problem in this problem set, we will be writing or evaluating some Python code.
+You are encouraged to use the VS Code IDE which will be discussed/presented in class, 
+but you are welcome to use another IDE if you choose.</p>
+<div class="admonition note">
+<p class="admonition-title">Important Guidelines: Comments and Docstrings</p>
+<ul>
+<li>
+<p>Refer to the class <a href="http://cs-people.bu.edu/azs/cs108/assignments/coding_standards">Coding Standards</a> for important
+    style guidelines. The grader will be awarding/deducting points for writing
+    code that comforms to these standards. </p>
+</li>
+<li>
+<p>Every program file must begin with a descriptive header comment that includes
+    your name, username/BU email, and a brief description of the work contained in 
+    the file.</p>
+</li>
+<li>
+<p>Every function must include a descriptive docstring that explains what the 
+    function does and identifies/defines each of the parameters to the function.</p>
+</li>
+</ul>
+</div>
+<p><br></p>
+<h2 id="objective-and-overview">Objective and Overview</h2>
+<p><em>Objective</em>: The objective of this assignment is to gain experience with object-oriented
+programming, including class design, writing methods, and client code to use objects of 
+your newly-created class.</p>
+<p><em>Overview</em>: In this assignment, you will extend the <code>Date</code> class to develop a <code>Holiday</code> 
+class to repesent objects that are calendar dates with special names. 
+You will store data for the month, day and year, and <code>Holiday</code> name.</p>
+<p><strong> You may NOT use any functions or tools from the python <code>calendar</code> module or any similar 
+    pre-existing libraries. </strong></p>
+<p><br></p>
+<h3 id="task-1-a-holiday-class">Task 1: A <code>Holiday</code> class</h3>
+<p><em>20 points; <strong>individual-only</strong></em></p>
+<p>In this assignment, you will extend your <code>Date</code> class from assignment 10 to create
+  a <code>Holiday</code> class. The <code>Holiday</code> is a <code>Date</code>, but it also has a special data attribute
+  to encapsulate its name. In addition, it has a special string representation.</p>
+<p>Here is an example using an object of the Holiday class:</p>
+<div class="codehilite"><pre>    if __name__ == '__main__':
+
+        today = Date(10, 16, 2019)
+        print('today =', today)
+
+        m = Holiday(4, 20, 2020, "Marathon Monday")
+        print('m =', m)
+
+        # methods `is_before` and `diff` are inherited from class Date:
+        print('m.is_before(today) =', m.is_before(today)) 
+        print('m.diff(today) =', m.diff(today))
+</pre></div>
+
+
+<p>The above prints out:</p>
+<div class="codehilite"><pre>    today = 10/16/2019
+    m = Marathon Monday (04/20/2020)
+    m.is_before(today) = False
+    m.diff(today) = 187
+</pre></div>
+
+
+<p><strong>Getting started</strong>  </p>
+<p>Begin by creating a new file <code>a11_holiday.py</code> in VS Code, and saving it in the same
+  directory as your <code>a10_date.py</code> file. In this new file, you should begin by importing
+  your <code>Date</code> class:</p>
+<div class="codehilite"><pre>    <span class="kn">from</span> <span class="nn">a10_date</span> <span class="kn">import</span> <span class="n">Date</span>
+</pre></div>
+
+
+<p><strong>Inheriting from class <code>Date</code></strong></p>
+<ol>
+<li>
+<p>Create a new class <code>Holiday</code> that inhereits from class <code>Date</code>.</p>
+</li>
+<li>
+<p>Create a specialized version of the <strong><code>__init__</code></strong> method, which will take
+    parameters for the <code>month</code>, <code>day</code>, <code>year</code>, and <code>name</code>. The constructor must
+    call the superclass (<code>Date</code>) constructor to initialize its data memebrs, and
+    then must initialize the specialized parameter <code>name</code>. You will know this works
+    when you can create an object of type <code>Holiday</code>, for example:</p>
+<div class="codehilite"><pre>if __name__ == '__main__':
+
+    m = Holiday(4, 20, 2020, "Marathon Monday")
+    print('m =', m)
+</pre></div>
+
+
+</li>
+<li>
+<p>Override the <strong><code>__repr__(self)</code></strong> method, which returns a string representation of a
+    <code>Holiday</code> object. This method will be called when an object of type
+    <code>Holiday</code> is printed. This method must <strong>return</strong> a beautifully-formatted string that
+    shows the holiday’s name, as well as its <code>'mm/dd/yyyy'</code> representation. For example:</p>
+<div class="codehilite"><pre>    Marathon Monday (04/20/2020)
+</pre></div>
+
+
+<p>The implementation of the <code>Holiday</code>‘s <strong><code>__repr__(self)</code></strong> method must call the 
+super-class method’s <code>__repr__</code> method, and use the result as part of the <code>Holiday</code> 
+string representation.</p>
+</li>
+</ol>
+<p><br></p>
+<h3 id="task-2-holiday-clients">Task 2: <code>Holiday</code> clients</h3>
+<p><em>60 points; <strong>individual-only</strong></em></p>
+<p>Now that you have written a functional <code>Holiday</code> class, we will put it to use!
+  Remember that the <code>Holiday</code> class is only a blueprint, or template, for how
+  <code>Date</code> objects should behave. We can now create <code>Holiday</code> objects according to
+  that template and use them in <em>client</em> code.</p>
+<p><strong>Getting started</strong>  </p>
+<p>To start, open a new file in VS Code and save it as <code>a11_holiday_client.py</code>. 
+  Put all of the code that you write for this problem in this file. 
+  <strong>Don’t forget to include appropriate comments at the top of the file, and a docstring for
+  your functions.</strong></p>
+<p><strong>IMPORTANT:</strong> Since your clients will need to construct <code>Holiday</code> objects, 
+  you need to import the <code>Holiday</code> class. </p>
+<p>Therefore, make sure that <code>a11_holiday.py</code> is in the same directory as <code>a11_holiday_client.py</code>, 
+and include the following statement at the top of <code>a11_holiday_client.py</code>:</p>
+<div class="codehilite"><pre>    <span class="kn">from</span> <span class="nn">a11_holiday</span> <span class="kn">import</span> <span class="n">Holiday</span>
+</pre></div>
+
+
+<p><strong>Your tasks</strong>  </p>
+<ol>
+<li>
+<p>We will use our <code>Holiday</code> class and it’s superclass <code>Date</code> class methods to find the 
+    dates of holidays for any year. The following <strong>bank holidays</strong> (when banks and the 
+    stock market are closed) are observed in the United States: </p>
+<ul>
+<li>New Year’s Day (January 1st, but observed on January 2nd if January 1st is a Sunday)</li>
+<li>Martin Luther King Day (the third Monday in January)</li>
+<li>President’s Day (the third Monday in February)</li>
+<li>Memorial Day (the last Monday in May)</li>
+<li>Independence Day (July 4th, observed on July 5th if July 4th is a Sunday)</li>
+<li>Labor Day (the first Monday in September)</li>
+<li>Thanksgiving Day (the fourth Thursday in November)</li>
+<li>Christmas Day (the 25th of December, observed on December 26th if the 25th is a Sunday) </li>
+<li>(The markets are also closed on Good Friday, but its date depends on the 
+ Lunar calendar and not the Gregorian Calendar, so we will skip it for now.)</li>
+</ul>
+<p>Write a function <strong><code>get_holidays(year)</code></strong> that will <em>returns</em> a list of the 
+<code>Holidays</code>s for any given year. The function will <strong>return</strong> a list of holidays, 
+which we can print out in our client (test) code.</p>
+<p><strong>Example:</strong></p>
+<div class="codehilite"><pre>if __name__ == '__main__':
+
+    ## TEST CODE:
+    holidays = get_holidays(2019)
+    print() # blank line
+    for h in holidays:
+        print(h, "is observed on a", h.day_of_week())
+</pre></div>
+
+
+<p><strong>Sample output:</strong></p>
+<div class="codehilite"><pre>New Year's Day (01/01/2019) is on a Tuesday
+Martin Luther King Day (01/21/2019) is on a Monday
+Presidents' Day (02/18/2019) is on a Monday
+Memorial Day (05/27/2019) is on a Monday
+Independence Day (07/04/2019) is on a Thursday
+Labor Day (09/02/2019) is on a Monday
+Thanksgiving Day (11/28/2019) is on a Thursday
+Christmas Day (12/25/2019) is on a Wednedsay
+</pre></div>
+
+
+<p>Note the special case when a fixed-date legal holiday (e.g., New Year’s Day,
+Independence Day, or Christmas) falls on a Sunday, and thus is observed on the 
+following Monday:</p>
+<p><strong>Example 2:</strong></p>
+<div class="codehilite"><pre>if __name__ == '__main__':
+
+    ## TEST CODE:
+    holidays = get_holidays(2023)
+    print() # blank line
+    for h in holidays:
+        print(h, "is observed on a", h.day_of_week())
+</pre></div>
+
+
+<p><strong>Sample output:</strong></p>
+<div class="codehilite"><pre>New Year's Day (01/01/2023) is on a Sunday
+New Year's Day (observed) (01/02/2023) is on a Monday
+Martin Luther King Day (01/16/2023) is on a Monday
+Presidents' Day (02/20/2023) is on a Monday
+Memorial Day (05/29/2023) is on a Monday
+Independence Day (07/04/2023) is on a Tuesday
+Labor Day (09/04/2023) is on a Monday
+Thanksgiving Day (11/23/2023) is on a Thursday
+Christmas Day (12/25/2023) is on a Monday
+</pre></div>
+
+
+<p>Notes:</p>
+<ul>
+<li>
+<p>In your function, use multiple <code>Holiday</code> objects to represent each of the holidays,
+  and use the <code>Holiday</code> methods to find the correct day of week as needed.</p>
+</li>
+<li>
+<p>Some holidays must occur on a specific weekday (for example, MLK day is always
+  the third Monday in January; it could be as early as January 15th, or as late as 
+  January 21st), a good strategy is to pick the earliest possible date, and then use 
+  a loop to increment the day until you get the required weekday. 
+  Use the keyword <code>break</code> to stop a loop (without stopping the function as a whole).</p>
+</li>
+<li>
+<p>The sample output above includes the <em>print out</em> generated by the test code. 
+  However, the completed function will only <strong>return</strong> a list of <code>Holiday</code> objects.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Write a function <strong><code>closest_holiday(date)</code></strong>, which will find the <code>Holiday</code> that is 
+    closest to that parameter <code>date</code>, which is a <code>Date</code> object. Here are some examples:</p>
+<div class="codehilite"><pre>if __name__ == '__main__':
+
+    date = Date(3, 24, 2020)
+    h = closest_holiday(date)
+    print(h, 'is the closest holiday to', date)
+
+    date = Date(8, 26, 2020)
+    h = closest_holiday(date)
+    print(h, 'is the closest holiday to', date)
+
+    date = Date(9, 26, 2020)
+    h = closest_holiday(date)
+    print(h, 'is the closest holiday to', date)
+</pre></div>
+
+
+<p>These would produce the following outputs:</p>
+<div class="codehilite"><pre>    Presidents' Day (02/17/2020) is the closest holiday to 03/24/2020
+    Labor Day (09/07/2020) is the closest holiday to 08/26/2020
+    Labor Day (09/07/2020) is the closest holiday to 09/26/2020
+</pre></div>
+
+
+<p>Notes:</p>
+<ul>
+<li>
+<p>This problem is similar to some of the problems that you solved in assignment 9,
+  and can be solved by using a list comprehension and list of lists technique.</p>
+</li>
+<li>
+<p>Call the function <code>get_holidays</code> from above to obtain a list of possible holidays
+  to consider, and then use the list comprehension to find the one closest to your <code>date</code>.</p>
+</li>
+<li>
+<p>Be careful! The closest Holiday might be in a different year! 
+  For example, the closest holiday to December 28th is New Years’ Day: </p>
+<div class="codehilite"><pre>date = Date(12, 29, 2020)
+h = closest_holiday(date)
+print(h, 'is the closest holiday to', date)
+</pre></div>
+
+
+<p>should produce the following result:</p>
+<div class="codehilite"><pre> New Year's Day (01/01/2021) is the closest holiday to 12/29/2020
+</pre></div>
+
+
+</li>
+</ul>
+</li>
+<li>
+<p>Write a function <strong><code>closest_holiday_on_weekday(date, weekday)</code></strong>, which will find the
+    <code>Holiday</code> that occurs on a given <code>weekday</code> that falls closest to that <code>date</code>. </p>
+<div class="codehilite"><pre>if __name__ == '__main__':
+
+    date = Date(9, 26, 2020)
+    weekday = 'Friday'
+    h = closest_holiday_on_weekday(date, weekday)
+    print(h,'is the closest', weekday, 'holiday to', date)
+
+    date = Date(9, 26, 2020)
+    weekday = 'Tuesday'
+    h = closest_holiday_on_weekday(date, weekday)
+    print(h,'is the closest', weekday, 'holiday to', date)
+</pre></div>
+
+
+<p>These would produce the following outputs:</p>
+<div class="codehilite"><pre>Christmas Day (12/25/2020) is the closest Friday holiday to 09/26/2020
+New Year's Day (01/01/2019) is the closest Tuesday holiday to 09/26/2020
+</pre></div>
+
+
+<p>Notes:</p>
+<ul>
+<li>
+<p>This problem is similar to some of the problems that you solved in assignment 9,
+  and can be solved by using a list comprehension and list of lists technique.</p>
+</li>
+<li>
+<p>Call the function <code>get_holidays</code> from above to obtain a list of possible holidays
+  to consider, and then use the list comprehension with an if statement to find the 
+  one closest to your <code>date</code>.</p>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="submitting-your-work">Submitting Your Work</h3>
+<p><em>20 points;</em> will be assigned by code review</p>
+<p>Log in to <a href="https://www.gradescope.com/courses/36306">GradeScope</a> to submit your work. </p>
+<p><em>Be sure to name your files correctly!</em></p>
+<p>You will submit two files for this assignment: 
+<code>a11_holiday.py</code> and 
+<code>a11_holiday_client.py</code>.</p>
+<p>When you upload the files, the autograder will test your program. </p>
+<p><strong><em>Notes:</em></strong> </p>
+<ul>
+<li>
+<p>Upload these files to Gradescope before the deadline. </p>
+</li>
+<li>
+<p>When you upload, the autograder script will process your file(s). </p>
+</li>
+<li>
+<p>You may resubmit as many times as you like before the deadline, and only the grade 
+     from the last submission will be counted. </p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Warning: Beware of Global <code>print</code> statements</p>
+<ul>
+<li>
+<p>The autograder script <strong><em>cannot</em></strong> handle <code>print</code> statements in the global scope,
+    and their inclusion causes this error: </p>
+<p>The autograder failed to execute correctly. Please ensure that your submission is valid. 
+Contact your course staff for help in debugging this issue. 
+Make sure to include a link to this page so that they can help you most effectively.</p>
+</li>
+<li>
+<p>You can prevent this error by not having any <code>print</code> statements in the global scope.
+    Instead, create an <code>if __name__ == '__main__':</code> section at the bottom of the file, and
+    put any test cases/print statements in that controlled block. </p>
+</li>
+<li>
+<p><code>print</code> statements inside of functions do not cause this problem. </p>
+</li>
+</ul>
+</div>
+</section>
+
+<footer>
+Last modified on October 16, 2019.
+</footer>
+
+</div>
+
+<div id="right">
+<div class="toc">
+<ul>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#assignment-11-user-defined-class-inheritance" class="current">Assignment 11: User Defined Class, Inheritance</a><ul>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#preliminaries" class="">Preliminaries</a></li>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#objective-and-overview" class="">Objective and Overview</a><ul>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#task-1-a-holiday-class" class="">Task 1: A Holiday class</a></li>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#task-2-holiday-clients" class="">Task 2: Holiday clients</a></li>
+<li><a href="http://cs-people.bu.edu/azs/cs108/assignments/a11.html#submitting-your-work" class="">Submitting Your Work</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div></div>
+
+
+
+
+</body></html>
