@@ -1,0 +1,746 @@
+from django.db import models
+from django.utils import timezone
+# Create your models here.
+class trader(models.Model):
+    """
+    this is the trader table with attributes name,email,password,dob,address
+    """
+    name=models.CharField(max_length=50,default='')
+    email=models.CharField(max_length=50,primary_key=True)
+    password=models.CharField(max_length=200)
+    street=models.CharField(max_length=30,default='')
+    city=models.CharField(max_length=30,default='')
+    district=models.CharField(max_length=30,default='')
+    phone=models.CharField(default=0,max_length=12)
+    
+class sell(models.Model):
+    """
+    this is sell table with attributes productname,quantity,price,discription,trader_id,p_id
+    """
+    p_id=models.AutoField(primary_key=True)
+    p_name=models.CharField(max_length=50)
+    description=models.CharField(max_length=100)
+    t_id=models.ForeignKey(trader,on_delete=models.CASCADE,related_name='sell')
+    quantity=models.CharField(max_length=20)
+    p_type=models.CharField(max_length=20,default='')
+    price=models.IntegerField()
+
+class buy(models.Model):
+    """
+    this is the buy table with attributes p_id ,trader_id,date
+    """
+    p_id=models.ForeignKey(sell,on_delete=models.CASCADE,related_name='sell')
+    t_id=models.ForeignKey(trader,on_delete=models.CASCADE,related_name='buy')
+    date=models.DateField()
+from . import views
+from django.urls import path
+
+urlpatterns=[
+    path('',views.home,name="home"),
+    path('auth/',views.auth,name="auth"),
+    path('signin/',views.signin,name="signin"),
+    path('signup/',views.signup,name="signup"),
+    path('buy/',views.sale,name='buy'),
+    path('profile/',views.profile,name='profile'),
+    path('profileupdate/',views.profileupdate,name="profileupdate"),
+    path('sell/',views.sell_form,name='sell'),
+    path('upload/',views.upload,name='upload'),
+    path('logout/',views.logout,name='logout'),
+    path('want/',views.want,name='want')
+    ]
+#banner {
+    /* The image used */
+    background-image: url("banner0.jpg");
+  
+    /* Half height */
+    height: 18rem;
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+  .searchbox{
+    margin-top:-2rem;
+  }
+  .product{
+    border-width: medium;
+  }
+from django.shortcuts import render
+from django.http import HttpResponse,JsonResponse
+from .models import trader,sell,buy
+# Create your views here.
+def home(request):
+    return render(request,'index.html')
+
+#authenctication handlers
+def auth(request):
+    return render(request,'auth.html')
+
+def signin(request):
+    r_email=str(request.GET['email'])
+    r_passwrd=str(request.GET['password'])
+    f_obj=trader.objects.filter(email=r_email)
+    if len(f_obj)==1 and f_obj[0].email==r_email and f_obj[0].password==r_passwrd:
+        data='ok'
+        request.session['user']=r_email
+    else:
+        data="notok"
+    return JsonResponse({'data':data})
+    
+def signup(request):
+    r_email=request.GET['email']
+    r_name=request.GET['name']
+    r_passwrd=request.GET['password']
+    f_obj=trader.objects.filter(email=r_email)
+    if len(f_obj)==0:
+        f_obj=trader(email=r_email,name=r_name,password=r_passwrd)
+        f_obj.save()
+        data="ok"
+    else:
+        data="notok"
+    return JsonResponse({'data':data})
+
+def logout(request):
+    try:
+        del request.session['user']
+    except:
+        pass
+    return redirect('/auth/')
+    
+def profile(request):
+    try:
+        user=request.session['user']
+        print(request.session['user'])
+        return render(request,'profile.html',{'obj':trader.objects.filter(email=user)[0]})
+    except:
+        return redirect('/auth/')
+        
+def profileupdate(request):
+    try:
+        user=request.session['user']
+        f_obj=trader.objects.get(email=user)
+        f_obj.name=request.GET['name']
+        f_obj.street=request.GET['street']
+        f_obj.city=request.GET['city']
+        f_obj.district=request.GET['district']
+        f_obj.phone=request.GET['phone']
+        try:
+            f_obj.save()
+            data="ok"
+        except:
+            data="notok"
+        return JsonResponse({'data':data})
+    except:
+        return redirect('/auth/')
+        
+def sell_form(request):
+    try:
+        user=request.session['user']
+        return render(request,'sell.html')
+    except:
+        return redirect('/auth/')
+        
+def upload(request):
+    f_obj=trader.objects.get(email=request.session['user'])
+    sell_obj=sell(p_name=request.GET['name'],description=request.GET['discription'],
+    f_id=f_obj,quantity=request.GET['quantity'],
+    p_type=request.GET['type'],price=request.GET['price'])
+    try:
+        sell_obj.save()
+        data="ok"
+    except:
+        data='notok'
+    return JsonResponse({'data':data})
+    
+def sale(request):
+    try:
+        user=request.session['user']
+        x=buy.objects.values_list('p_id',flat=True)
+        print(x)
+        d=dict()
+        for i in x:
+            if i not in d:
+                d[i]=True
+            else:
+                continue
+        p_obj=[]
+        for i in sell.objects.all():
+            if i.p_id not in d:
+                p_obj.append(i)
+            
+        return render(request,'buy.html',{'products':p_obj})
+    except:
+        return redirect('/auth/')
+        
+def want(request):
+    try:
+        user=request.session['user']
+        f_obj=trader.objects.get(email=user)
+        p_obj=sell.objects.get(p_id=request.GET['id'])
+        b_obj=buy(f_id=f_obj,p_id=p_obj,date=datetime.date.today())
+        b_obj.save()
+        return JsonResponse({'data':'ok'})
+    except:
+        return JsonResponse({'data':'notok'})
+
+
+from django.contrib import admin
+from .models import trader,sell,buy
+# Register your models here.
+admin.site.register(trader)
+admin.site.register(sell)
+admin.site.register(buy)
+from django.test import TestCase
+
+# Create your tests here.
+
+
+
+
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Antique Exchange</title>
+        <link rel="stylesheet" href="{% static 'index.css' %}">
+      </head>
+<body class="bg-light">
+        <header>
+                <nav class="navbar navbar-expand-lg navbar-light  bg-success fixed-top scrolling-navbar">
+                    <a class="navbar-brand nav-link text-uppercase font-weight-bold text-white ml-2" href="/">Antique Exchange</a>
+
+                </nav>
+      <!--Mask-->
+<div id="intro" class="view">
+
+        <div class="mask rgba-black-strong">
+                  <div class="row mt-5">
+
+                  </div>
+                  <div class="row mt-5">
+
+                    </div>
+                    <div class="row mt-3">
+
+                      </div>
+            <div class="container-fluid d-flex align-items-center justify-content-center h-100">
+
+                <div class="row d-flex justify-content-center text-center">
+
+                    <div class="col-md-10">
+
+                        <!-- Heading -->
+                        <h2 class="display-4 font-weight-bold text-white pt-5 mb-2">Antique Exchange</h2>
+
+                        <!-- Divider -->
+                        <hr class="hr-light">
+
+                        <!-- Description -->
+                        <h4 class="text-black my-4">The best place for antique collectors to buy and sell.</h4>
+
+                         <a class="btn  bg-success" href='/auth/'>Signin / Signup</a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!--/.Mask-->
+            </header>
+ <main class="mt-5">
+ <div class="container " style="margin-top: 5rem;">
+
+
+ </div>
+ </main>
+ <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+                <!-- Required meta tags -->
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                <!-- Bootstrap CSS -->
+                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+                <title>Antique Exchange</title>
+
+              </head>
+<body class="bg-light">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light  bg-success fixed-top scrolling-navbar">
+            <a class="navbar-brand nav-link text-uppercase font-weight-bold text-white ml-2" href="/">Antique Exchange</a>
+        </nav>
+    </header>
+    <main>
+     <div class="container "style="margin-top:8rem;">
+            <div class="row" style="margin-top: 3rem"></div>
+            <div class="row justify-content-center ">
+
+                <div class="col-md-6 border-warning shadow bg-white"  style="border-width:medium;">
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills px-5 " role="tablist">
+                    <li class="nav-item pills-1 ">
+                      <a class="nav-link active " id="signintab" data-toggle="tab" href="#panel7" role="tab">
+                        Sign in</a>
+                    </li>
+                    <li class="nav-item pills-2">
+                      <a class="nav-link " id="signuptab" data-toggle="tab" href="#panel8" role="tab">
+                        Sign up</a>
+                    </li>
+                  </ul>
+
+                  <!-- Tab panels -->
+                  <div class="tab-content">
+
+                    <div class="tab-pane fade  show active" id="panel7" role="tabpanel" aria-labelledby="signintab">
+
+                      <div class="modal-body">
+                        <form style="margin-top: 0rem;" id="signin">
+                            <div class="form-group">
+                              <label for="Inputemail"><i class="fas fa-user mr-1"></i>Email </label>
+                              <input type="email" class="form-control" id="signinemail" aria-describedby="emailHelp" required>
+
+                            </div>
+                            <div class="form-group">
+                              <label for="InputPassword"><i class="fas fa-lock prefix mr-1"></i>Password</label>
+                              <input type="password" class="form-control" id="signinpassword"  required >
+                            </div>
+
+                            <input type="submit" class="btn btn-dark" value="submit" >
+
+                          </form>
+
+                    </div>
+
+                    </div>
+
+                    <div class="tab-pane fade" id="panel8" role="tabpanel" aria-labelledby="signuptab">
+
+                      <div class="modal-body" >
+                        <form style="margin-top: 0rem;"  id="signup">
+                            <div class="form-group">
+                              <label for="InputEmail"> <i class="fas fa-envelope prefix mr-1"></i>Email address</label>
+                              <input type="email" class="form-control" id="signupemail" aria-describedby="emailHelp"   >
+
+                            </div>
+                            <div class="form-group">
+                                <label for="accountname"><i class="fas fa-user mr-1"></i>Account name</label>
+                                <input type="text" class="form-control" id="signupname"  >
+                              </div>
+
+
+                            <div class="form-group">
+                              <label for="InputPassword"><i class="fas fa-lock prefix mr-1"></i>Password</label>
+                              <input type="password" class="form-control" id="signuppassword" minlength="8"  >
+                            </div>
+
+                            <input type="submit" class="btn btn-dark" value="submit">
+                          </form>
+
+                    </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+              </div>
+
+
+
+            </div>
+            <div class="row" style="margin-bottom: 5rem">
+
+              </div>
+
+     </div>
+    </main>
+    </script>
+</body>
+
+</html>
+
+""" URLs
+"""
+from django.contrib import admin
+from django.urls import path,include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('',include('antique_exchange.url'))
+]
+
+from django.apps import AppConfig
+
+
+class AntiqueStoreConfig(AppConfig):
+    name = 'antique_exchange'
+
+{% load static %}
+{% static "images" as baseUrl %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'buy.css' %}">
+    <title>Antique Exchange</title>
+  </head>
+  <body class="bg-light">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light  bg-success fixed-top scrolling-navbar">
+            <a class="navbar-brand nav-link text-uppercase font-weight-bold text-white ml-2" href="/">Antique Exchange</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon "></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active"><a href="/buy/" class="nav-link text-uppercase font-weight-bold  text-white ml-2">Buy</a></li>
+                    <li class="nav-item "><a href="/sell/"class="nav-link text-uppercase font-weight-bold text-white ml-2 " >Sell</a></li>
+                    <li class="nav-item "><a href="/profile/"class="nav-link text-uppercase font-weight-bold text-white ml-2" >profile</a></li>
+                    <li class="nav-item "><a href="/logout/"class="nav-link text-uppercase font-weight-bold text-white " >Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="mt-5">
+    <div class="row"id="banner">
+    </div>
+    <div class="container">
+        <div class="row text-center searchbox">
+            <div class="col-md-6 mx-auto bg-success py-4 rounded-pill" >
+                <input  class="rounded-pill" type="text" name="" placeholder="     Enter price" style="width:60%">
+                <button class="btn btn-dark text-white rounded-pill">Search</button>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="container mt-5">
+      <div class="row justify-content-around  ">
+        {% for p in products %}
+         <div class="col-md-6  ">
+            <div class="row shadow bg-white rounded product m-2">
+            <div class="col-md-6">
+               <img class=" w-100 py-3" src="{{baseUrl}}/{{p.p_type}}.jpg">
+               <p><b>Trader : </b>{{p.f_id.email}}</p>
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-center font-weight-bold mt-1">{{p.p_name}}</h5>
+                <p>{{p.description}}</p>
+                <p><b>Quantity : </b>{{p.quantity}}</p>
+                <p><b>Price : </b>{{p.price}} Rs</p>
+                <input type="button" class="btn btn-dark" value="Buy" id="buy" onclick=callme({{p.p_id}})>
+            </div>
+            </div>
+        </div>
+        {% endfor %}
+
+
+      </div>
+    </div>
+
+
+    </main>
+</body>
+</html>
+
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'profile.css' %}">
+    <title>Antique Exchange</title>
+  </head>
+  <body class="bg-light">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light  bg-success fixed-top scrolling-navbar">
+            <a class="navbar-brand nav-link text-uppercase font-weight-bold text-white ml-2" href="/">Antique Exchange</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon "></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active"><a href="/buy/" class="nav-link text-uppercase font-weight-bold  text-white ml-2">Buy</a></li>
+                    <li class="nav-item "><a href="/sell/"class="nav-link text-uppercase font-weight-bold text-white ml-2 " >Sell</a></li>
+                    <li class="nav-item "><a href="/profile/"class="nav-link text-uppercase font-weight-bold text-white ml-2" >profile</a></li>
+                    <li class="nav-item "><a href="/logout/"class="nav-link text-uppercase font-weight-bold text-white " >Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="mt-5">
+        <div class="container">
+
+                    <form class="shadow bg-white rounded"  style="border-width:medium;">
+                    <div class="row ml-2 justify-content-center">
+                      <div class="col-md-6 text-center">
+                        <h3 class=" py-2 font-weight-bold ">PROFILE DETAILS</h3>
+                      </div>
+                    </div>
+                    <div class="row ml-2 mr-2 mt-2">
+                        <div class="form-group col-md-4">
+                            <label for="accountname">Account name</label>
+                                <input type="text" class="form-control" id="name" value="{{obj.name}}">
+
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="dob">Date of birth</label>
+                                <input type="date" class="form-control" id="dob" value="{{dob}}">
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label for="phone">Phone number</label>
+                                <input type="number" maxlength="12" minlength="10" class="form-control" id="phone" value="{{obj.phone}}">
+                        </div>
+
+                    </div>
+
+                    <div class="row ml-2 mt-2">
+                        <div class="col-md-4">
+                            <p>Address</p>
+                        </div>
+
+                    </div>
+                    <div class="row ml-2 mr-2">
+                        <div class=" form-group col-md-3">
+                            <label for="street">Street</label>
+                                <input type="text" class="form-control" id="street" value="{{obj.street}}">
+
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="city">city</label>
+                                <input type="text" class="form-control" id="city" value="{{obj.city}}"  >
+
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="district">district</label>
+                                <input type="text" class="form-control" id="district" value="{{obj.district}}">
+                        </div>
+                    </div>
+                    <div class="row" id="updatebtn">
+                    <input type="button" class="btn btn-dark ml-5 mb-3" value="update" id="update">
+                    </div>
+                  </form>
+               <!-- <hr>
+            <h3 class=" font-weight-bold m-auto text-center mt-5">HISTORY</h3>
+         <div class="container mt-2">
+           <div class="row justify-content-center">
+              <div class="col bg-white rounded-pill shadow ">
+                <div class="row justify-content-center">
+                    <div class="col-md-4 text-center py-4 font-weight-bold">
+
+                      21 - 09 - 2019
+                    </div>
+                    <div class="col-md-4 py-2 font-weight-bold">
+                      Bought
+                      chindi potato
+                      from chikkanna (8867762336)
+                    </div>
+                    <div class="col-md-4 text-center py-4 font-weight-bold">
+                       25000 Rs
+                    </div>
+
+                </div>
+              </div>
+           </div>
+           <div class="row justify-content-center mt-3">
+                <div class="col bg-white rounded-pill shadow ">
+                  <div class="row justify-content-center">
+                      <div class="col-md-4 text-center py-4 font-weight-bold">
+
+                        21 - 09 - 2019
+                      </div>
+                      <div class="col-md-4 py-2 font-weight-bold">
+                        Sold
+                        chindi potato
+                        from chikkanna (8867762336)
+                      </div>
+                      <div class="col-md-4 text-center py-4 font-weight-bold">
+                         25000 Rs
+                      </div>
+
+                  </div>
+                </div>
+             </div>
+         </div>-->
+        </div>
+    </main>
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Antique Exchange</title>
+      </head>
+<body class="bg-light">
+        <header>
+                <nav class="navbar navbar-expand-lg navbar-light  bg-success fixed-top scrolling-navbar">
+                    <a class="navbar-brand nav-link text-uppercase font-weight-bold text-white ml-2" href="/">Antique Exchange</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon "></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item active"><a href="/buy/" class="nav-link text-uppercase font-weight-bold  text-white ml-2">Buy</a></li>
+                            <li class="nav-item "><a href="/sell/"class="nav-link text-uppercase font-weight-bold text-white ml-2 " >Sell</a></li>
+                            <li class="nav-item "><a href="/profile/"class="nav-link text-uppercase font-weight-bold text-white ml-2" >profile</a></li>
+                            <li class="nav-item "><a href="/logout/"class="nav-link text-uppercase font-weight-bold text-white " >Logout</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+ <main class="mt-5">
+ <div class="container " style="margin-top: 5rem;">
+        <form class="shadow bg-white rounded"  style="border-width:medium;"id="add">
+                <div class="row ml-2 mt-5 justify-content-center">
+                  <div class="col-md-6 text-center">
+                    <h3 class=" py-2 font-weight-bold ">ENTER DETAILS</h3>
+                  </div>
+                </div>
+                <div class="row ml-2 mr-2 mt-2">
+                    <div class="form-group col-md-4">
+                        <label for="accountname">Product name</label>
+                            <input type="text" class="form-control" id="name" required >
+
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="type">Product Type</label>
+                        <select class="form-control" id='type'>
+                            <option>Painting</option>
+                            <option>Sculpture</option>
+                            <option>Jewelry</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label for="quantity">Quantity</label>
+                        <input type="text" class="form-control" id="quantity"required >
+                    </div>
+
+                </div>
+
+                <div class="row ml-2 mt-2">
+                    <div class="col-md-4">
+                        <p>Description</p>
+                    </div>
+
+                </div>
+                <div class="row ml-2 ">
+                    <div class="form-group col-md-6">
+                        <textarea class="form-control" rows="5" id="description" required></textarea>
+                    </div>
+                </div>
+                <div class="row ml-2 ">
+                    <div class="form-group col-md-3">
+                        <label for="price">Price</label>
+                        <input class="form-control" type="number" id="price" required>
+                    </div>
+                </div>
+                <input type="button" class="btn btn-secondary ml-4 mb-3 " value="upload" id="upload">
+              </form>
+ </div>
+ </main>
+<script src="https://kit.fontawesome.com/16581b654e.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#upload').click(function()
+        {
+            $.get(
+                '/upload/',
+                {'name':$("#name").val(),
+                'description':$("#description").val(),
+                'price':$("#price").val(),
+                'quantity':$("#quantity").val(),
+                'type':$("#type").val()},
+                function(response)
+                {
+                    if(response.data=="ok")
+                    {
+                        alert("successfully uploaded")
+                        location.reload()
+                    }
+                    else
+                    alert('error in upload try after sometimes')
+                }
+            )
+        })
+    })
+</script>
+</body>
+</html>
+
+/* not active */
+.pill-1 .nav-link:not(.active) {
+    background-color: rgba(255, 0, 0, 0.5);
+}
+
+.pill-2 .nav-link:not(.active) {
+    background-color: rgba(0, 250, 0, 0.5);
+}
+
+
+
+/* active (faded) */
+.pill-1 .nav-link {
+    background-color: rgba(255, 0, 0, 0.2);
+    color: white;
+}
+
+.pill-2 .nav-link {
+    background-color: rgba(0, 250, 0, 0.2);
+}
+
+
+
+form{
+    margin-top: 5rem;
+}
+.history{
+    display: inline;
+}
+footer{
+    width: 100%;
+    height: 1rem;
+}
